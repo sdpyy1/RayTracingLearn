@@ -4,20 +4,50 @@
 
 #include <iostream>
 
-// 判断r是否与这个球体相交
-bool hit_sphere(const point3& center, double radius, const ray& r) {
-    auto a = dot(r.direction(),r.direction());
-
-    auto b = -2*dot(r.direction(),center-r.origin());
-
-    auto c = dot(center-r.origin(),center-r.origin()) - radius * radius;
-
-    auto discriminant = b*b - 4 *a *c;
-    return discriminant>0;
+// 判断r是否与这个球体相交 bool
+bool is_hit_sphere(const point3& center, double radius, const ray& r) {
+    vec3 oc = center - r.origin();
+    auto a = dot(r.direction(), r.direction());
+    auto b = -2.0 * dot(r.direction(), oc);
+    auto c = dot(oc, oc) - radius*radius;
+    auto discriminant = b*b - 4*a*c;
+    return discriminant>0;  
 }
+
+// 判断并计算交点，返回近的一个交点（不考虑t小于0）
+double hit_sphere(const point3& center, double radius, const ray& r) {
+    vec3 oc = center - r.origin();
+    auto a = dot(r.direction(), r.direction());
+    auto b = -2.0 * dot(r.direction(), oc);
+    auto c = dot(oc, oc) - radius*radius;
+    auto discriminant = b*b - 4*a*c;
+     if (discriminant < 0) {
+        return -1.0;
+    } else {
+        return (-b - std::sqrt(discriminant) ) / (2.0*a);
+    }
+}
+
+// 交点计算可以化简
+double hit_sphere_simple(const point3& center, double radius, const ray& r) {
+    vec3 oc = center - r.origin();
+    auto a = r.direction().length_squared();
+    auto h = dot(r.direction(), oc);
+    auto c = oc.length_squared() - radius*radius;
+    auto discriminant = h*h - a*c;
+
+    if (discriminant < 0) {
+        return -1.0;
+    } else {
+        return (h - std::sqrt(discriminant)) / a;
+    }
+}
+
 color ray_color(const ray& r) {
-    if(hit_sphere(point3(0,0,-1),0.2,r)){
-        return color(1,0,0);
+    auto t = hit_sphere_simple(point3(0,0,-1), 0.5, r);
+    if (t > 0.0) {
+        vec3 N = unit_vector(r.at(t) - vec3(0,0,-1));  // 法线方向，从圆心指向交点
+        return 0.5*color(N.x()+1, N.y()+1, N.z()+1);
     }
     
     vec3 unit_direction = unit_vector(r.direction());
