@@ -2,6 +2,8 @@
 #define CAMERA_H
 
 #include "hittable.h"
+#include "material.h"
+
 class camera {
   public:
     
@@ -71,8 +73,11 @@ class camera {
         hit_record rec;
         // 设置最小t是防止自击中（浮点数误差导致的）
         if (world.hit(r, interval(0.001, infinity), rec)) {
-            vec3 direction = rec.normal + random_unit_vector();  // 让递归光线不仅随机，而且是以法线半球范围内进行随机
-            return 0.5 * ray_color(ray(rec.p, direction), depth-1, world);
+            ray scattered;
+            color attenuation;
+            if (rec.mat->scatter(r, rec, attenuation, scattered))  // 用击中点的材质进行散射
+                return attenuation * ray_color(scattered, depth-1, world);
+            return color(0,0,0);
         }
 
         vec3 unit_direction = unit_vector(r.direction());

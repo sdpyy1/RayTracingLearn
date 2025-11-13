@@ -1,5 +1,6 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
+class material;
 
 class hit_record {
   public:
@@ -7,6 +8,8 @@ class hit_record {
     vec3 normal;
     double t;
     bool front_face;
+    shared_ptr<material> mat;
+
     // 用于区分外法线还是内法线，因为光线可能从球体内部击中球得表面，这时候的法线应该用指向圆心的法线（取反）
     void set_face_normal(const ray& r, const vec3& outward_normal) {
         // Sets the hit record normal vector.
