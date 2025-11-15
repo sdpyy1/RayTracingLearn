@@ -114,8 +114,8 @@ class camera {
         // 没有景深时起点就是摄像机位置，但是有景深时起点是摄像机为中心的散焦圆盘上的随机点
         auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
         auto ray_direction = pixel_sample - ray_origin;
-
-        return ray(ray_origin, ray_direction);
+        auto ray_time = random_double(); // 设置一个随机时间用于运动模糊
+        return ray(ray_origin, ray_direction, ray_time); 
     }
     point3 defocus_disk_sample() const {
         // Returns a random point in the camera defocus disk.
