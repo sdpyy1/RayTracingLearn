@@ -18,7 +18,7 @@ class hittable_list : public hittable {
 
     void add(shared_ptr<hittable> object) {
         objects.push_back(object);
-        bbox = aabb(bbox, object->bounding_box());
+        bbox = aabb(bbox, object->bounding_box()); // add Model 时 更新包围盒
     }
     aabb bounding_box() const override { return bbox; }
 

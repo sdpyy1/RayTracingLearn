@@ -6,30 +6,37 @@
 #include "hittable_list.h"
 #include <algorithm>
 
-class bvh_node : public hittable {
+class bvh_node : public hittable {   
   public:
     bvh_node(hittable_list list) : bvh_node(list.objects, 0, list.objects.size()) {
          
     }
 
     bvh_node(std::vector<shared_ptr<hittable>>& objects, size_t start, size_t end) {
-         int axis = random_int(0,2);
+        // Build the bounding box of the span of source objects.
+        bbox = aabb::empty;
+        for (size_t object_index=start; object_index < end; object_index++)
+            bbox = aabb(bbox, objects[object_index]->bounding_box());
 
+        int axis = bbox.longest_axis();
+        // 排序器
         auto comparator = (axis == 0) ? box_x_compare
                         : (axis == 1) ? box_y_compare
                                       : box_z_compare;
 
         size_t object_span = end - start;
 
-        if (object_span == 1) {
+        if (object_span == 1) { // 只有一个物体
             left = right = objects[start];
-        } else if (object_span == 2) {
+        } else if (object_span == 2) { // 有两个物体
             left = objects[start];
             right = objects[start+1];
         } else {
+            // 在某个轴方向对objects进行排序
             std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);
-
+            // 划分为两半
             auto mid = start + object_span/2;
+            // 递归构建子节点
             left = make_shared<bvh_node>(objects, start, mid);
             right = make_shared<bvh_node>(objects, mid, end);
         }
