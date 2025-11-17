@@ -1,5 +1,6 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
+#include "perlin.h"
 
 class texture {
   public:
@@ -44,5 +45,17 @@ class checker_texture : public texture {
     double inv_scale;
     shared_ptr<texture> even;
     shared_ptr<texture> odd;
+};
+
+class noise_texture : public texture {
+  public:
+    noise_texture() {}
+
+    color value(double u, double v, const point3& p) const override {
+        return color(1,1,1) * noise.noise(p);
+    }
+
+  private:
+    perlin noise;
 };
 #endif
